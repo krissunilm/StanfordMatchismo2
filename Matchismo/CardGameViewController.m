@@ -7,82 +7,65 @@
 //
 
 #import "CardGameViewController.h"
+#import "CardMatchingGame.h"
+
 
 @interface CardGameViewController ()
 
-@property (weak, nonatomic) IBOutlet UILabel *flipLabel;
+@property (strong, nonatomic) IBOutletCollection(UIButton) NSArray *cardButtons;
 
-@property (nonatomic) int flipCount;
-
-
-@property (nonatomic) Deck *myDeck;
+@property (strong, nonatomic) CardMatchingGame *game;
+@property (weak, nonatomic) IBOutlet UILabel *scoreLabel;
+@property (weak, nonatomic) IBOutlet UIButton *redealButton;
 
 @end
 
 @implementation CardGameViewController
 
 
-- (Deck *) myDeck {
+- (CardMatchingGame *) game {
     
-    if( !_myDeck) _myDeck = [[ PlayingCardDeck alloc] init];
+    if(!_game) _game = [[CardMatchingGame alloc] initWithCardCount:[self.cardButtons count] usingDeck:[self createDeck]];
     
-    return _myDeck;
+    return _game;
+}
+
+
+
+- (void) reDeal {
+    
+  //This needs to call a reDEal method in the game that should reset the cards
+    
+    [self updateUI];
     
 }
 
-- (void)setFlipCount:(int)flipCount
-{
-    _flipCount = flipCount;
-    self.flipLabel.text = [NSString stringWithFormat:@" Flips : %d", self.flipCount];
+- (Deck *) createDeck {
     
-    NSLog(@"FlipCount = %d", self.flipCount);
+    return [[PlayingCardDeck alloc ] init];
+}
+
+
+- (IBAction)touchRedealButton:(id)sender {
     
+    [self reDeal];
     
 }
+
 
 
 - (IBAction)touchCardButton:(UIButton *)sender {
     
     
     
-    
-
-    
+    int cardIndex = [self.cardButtons indexOfObject:sender];
     
     
-    if([sender.currentTitle length]) {
-        [sender setBackgroundImage:[UIImage imageNamed:@"cardback"]
-                          forState:UIControlStateNormal];
-        
-        [sender setTitle:@"" forState:UIControlStateNormal];
+    [self.game chooseCardAtIndex:cardIndex];
     
-    } else {
-        
-        [sender setBackgroundImage:[UIImage imageNamed:@"cardfront"]
-                          forState:UIControlStateNormal];
-        
-        
-        //original now need to get it from PlayingCardDeck
-        //[sender setTitle:@"A♣️" sforState:UIControlStateNormal];
-        
-        
-        //ok but if user clicks 105 times then we will run out of cards
-        //[sender setTitle:[self.myDeck drawRandomCard].contents forState:UIControlStateNormal];
-        
-        PlayingCard *currentCard = (PlayingCard *)[self.myDeck drawRandomCard];
-        
-        if(currentCard) {
-            [sender setTitle:currentCard.contents forState:UIControlStateNormal];
-            
-        } else {
-            _myDeck = [[ PlayingCardDeck alloc] init];
-            [sender setTitle:[self.myDeck drawRandomCard].contents forState:UIControlStateNormal];
-        }
-        
-    }
+    [self updateUI];
     
-    self.flipCount++;
-    
+  
     
     
     
@@ -90,6 +73,42 @@
 }
 
 
+- (void) updateUI {
+    
+    //go though UIButtons and basically keep the view updated with the model
+    
+    for ( UIButton *cardButton in self.cardButtons){
+        
+        int cardIndex = [self.cardButtons indexOfObject:cardButton];
+        
+        Card *card = [self.game cardAtIndex:cardIndex];
+        
+        [cardButton setTitle:[self titleForCard:card] forState:UIControlStateNormal];
+        [cardButton setBackgroundImage:[self backgroundImageForCard:card] forState:UIControlStateNormal];
+        cardButton.enabled = !card.isMatched;
+        
+        
+    }
+    
+    self.scoreLabel.text = [NSString stringWithFormat:@"Score: %d", self.game.score];
+    
+    
+}
+
+
+- (NSString *) titleForCard:(Card *)card {
+    
+    return card.isChosen ? card.contents : nil;
+    
+    
+    
+}
+
+- (UIImage *) backgroundImageForCard:(Card *) card {
+    
+    return [UIImage imageNamed:card.isChosen ? @"cardfront" : @"cardback"];
+    
+}
 
 - (void)viewDidLoad
 {

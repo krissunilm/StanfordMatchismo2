@@ -18,4 +18,7 @@
 
 + (NSUInteger) maxRank;
 
+//differ from prof i feel if you override it should be made public to let reader know what we have done
+- (int) match:(NSArray *)otherCards ;
+
 @end

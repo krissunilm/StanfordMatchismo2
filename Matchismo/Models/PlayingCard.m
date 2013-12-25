@@ -18,6 +18,40 @@
 @synthesize suit = _suit;
 
 
+- (int) match:(NSArray *)otherCards {
+    
+    int score = 0;
+
+    NSLog(@"Inside Playing Card Match");
+    //match only one card array need to change for assignment
+    if ( [otherCards count] == 1) {
+        
+         NSLog(@"Inside Playing Card Match [otherCards count] == 1");
+        
+        //firstObject gets the first object in array if empty array then nil
+        //without crashing vs. othercards[0];
+        PlayingCard *otherCard = [otherCards firstObject];
+        
+        if( [self.suit isEqualToString:[otherCard suit]]) {
+            NSLog(@"Inside Playing Card Match Matched Suit += 1");
+            score = 1;
+        } else if (self.rank == otherCard.rank ) {
+            
+            score = 4;
+             NSLog(@"Inside Playing Card Match Matched Rank += 4");
+            
+        }
+        
+        
+    }
+    
+    
+    return score;
+    
+    
+}
+
+
 - (NSString *) contents {
     
     NSArray *rankString = [PlayingCard rankStrings];
